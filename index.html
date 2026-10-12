@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BreederDesk</title>
+<meta name="theme-color" content="#1b3a4b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BreederDesk">
+<style>
+  :root{--navy:#1b3a4b;--gold:#c9a227;--teal:#0e7c7b}
+  *{box-sizing:border-box} body{margin:0;min-height:100vh;background:var(--navy);color:#fff;font-family:"Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+  img{width:96px;height:96px;border-radius:22px} h1{font-size:28px;margin:14px 0 6px} h1 span{color:var(--gold)}
+  p{color:#cfdbe2;max-width:360px;line-height:1.5}
+  button,a.btn{display:block;width:100%;max-width:320px;margin:10px auto;padding:16px;font-size:18px;border:0;border-radius:12px;cursor:pointer;text-decoration:none;font-weight:600}
+  #install{background:var(--gold);color:#1b3a4b} a.btn{background:var(--teal);color:#fff}
+  .hidden{display:none} small{color:#9fb3c0}
+</style>
+</head>
+<body>
+  <img src="icon-192.png" alt="">
+  <h1>Breeder<span>Desk</span></h1>
+  <p id="msg">Tap <b>Install</b> to put BreederDesk on your home screen.</p>
+  <button id="install" class="hidden">📲 Install BreederDesk</button>
+  <a class="btn" id="open" href="#">Open BreederDesk</a>
+  <p id="manual" class="hidden"><small>If no Install button appears: tap <b>⋮</b> → <b>Install app</b> (Android) or <b>Share → Add to Home Screen</b> (iPhone).</small></p>
+<script>
+  // The real app lives on Google Apps Script, which can't be installed itself; this small
+  // installable page is the home-screen icon and hands straight off to it.
+  const APP = "https://script.google.com/macros/s/AKfycby8RQtzzcjrr4Sop-9kE_c-CoIl1JLl7uui2m0H9iHsZhzWWGGDxc89IlC4WiKtSowT/exec";
+  document.getElementById("open").href = APP;
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (standalone || location.search.includes("launch=1")) location.replace(APP);
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+  let deferred = null; const btn = document.getElementById("install");
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; btn.classList.remove("hidden"); });
+  btn.onclick = async () => { if (!deferred) return; deferred.prompt(); const r = await deferred.userChoice; deferred = null; btn.classList.add("hidden");
+    document.getElementById("msg").innerHTML = r.outcome === "accepted" ? "✅ Installed! Open <b>BreederDesk</b> from your home screen." : "Tap Install any time."; };
+  addEventListener("appinstalled", () => { document.getElementById("msg").innerHTML = "✅ Installed! Open <b>BreederDesk</b> from your home screen."; });
+  setTimeout(() => { if (!deferred) document.getElementById("manual").classList.remove("hidden"); }, 2500);
+</script>
+</body>
+</html>
